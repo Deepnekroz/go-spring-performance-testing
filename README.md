@@ -11,6 +11,8 @@ cd docker-influxdb-grafana
 docker pull grafana/grafana
 docker pull influxdb
 docker pull telegraf
+docker pull deepnekro/go-perf:0.0.4
+docker pull deepnekro/java-perf:0.0.5
 ```
 
 Run your stack:

@@ -1,35 +1,60 @@
-influxdb:
-  image: influxdb:latest
-  container_name: influxdb
-  ports:
-    - "8083:8083"
-    - "8086:8086"
-    - "8090:8090"
-  env_file:
-    - 'env.influxdb'
-  volumes:
-    # Data persistency
-    # sudo mkdir -p /srv/docker/influxdb/data
-    - /srv/docker/influxdb/data:/var/lib/influxdb
+version: '2.2'
+services:
+  influxdb:
+    image: influxdb:latest
+    container_name: influxdb
+    hostname: influxdb
+    ports:
+      - "8083:8083"
+      - "8086:8086"
+      - "8090:8090"
+    env_file:
+      - 'env.influxdb'
+    volumes:
+      # Data persistency
+      # sudo mkdir -p /srv/docker/influxdb/data
+      - /tmp/docker/influxdb/data:/var/lib/influxdb
 
-telegraf:
-  image: telegraf:latest
-  container_name: telegraf
-  links:
-    - influxdb
-  volumes:
-    - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+  telegraf:
+    image: telegraf:latest
+    container_name: telegraf
+    hostname: telegraf
+    links:
+      - influxdb
+      # - java-perf
+      - go-perf
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - /var/run/docker.sock:/var/run/docker.sock
 
-grafana:
-  image: grafana/grafana:latest
-  container_name: grafana
-  ports:
-    - "3000:3000"
-  env_file:
-    - 'env.grafana'
-  links:
-    - influxdb
-  volumes:
-    # Data persistency
-    # sudo mkdir -p /srv/docker/grafana/data; chown 472:472 /srv/docker/grafana/data
-    - /srv/docker/grafana/data:/var/lib/grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    env_file:
+      - 'env.grafana'
+    links:
+      - influxdb
+    volumes:
+      # Data persistency
+      # sudo mkdir -p /srv/docker/grafana/data; chown 472:472 /srv/docker/grafana/data
+      - /Users/dmitrysergeev/study/projector/grafana/data:/var/lib/grafana
+  go-perf:
+    image:  deepnekro/go-perf:0.0.4
+    container_name: go-perf
+    hostname: go-perf
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+    cpuset: 0,1
+    mem_limit: 500m
+  # java-perf:
+  #   image: deepnekro/java-perf:0.0.5
+  #   container_name: java-perf
+  #   hostname: java-perf
+  #   ports:
+  #     - "8080:8080"
+  #     - "9090:9090"
+  #   cpuset: 0,1
+  #   mem_limit: 500m
